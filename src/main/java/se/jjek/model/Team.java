@@ -3,6 +3,7 @@ package se.jjek.model;
 import java.util.Collection;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 
 @Entity
@@ -11,8 +12,10 @@ public final class Team extends AbstractEntity {
 	private String teamName;
 	private boolean active;
 
-	@OneToMany
+	@OneToMany(mappedBy = "team", fetch = FetchType.EAGER)
 	private Collection<User> users;
+	
+	protected Team(){}
 
 	public Team(String teamName, boolean active) {
 		this.teamName = teamName;

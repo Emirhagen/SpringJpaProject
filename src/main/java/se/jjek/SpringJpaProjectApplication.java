@@ -10,5 +10,6 @@ public class SpringJpaProjectApplication {
 		SpringApplication.run(SpringJpaProjectApplication.class, args);
 		System.out.println("hejhej");
 		System.out.println("Test");
+		System.out.println("Test3");
 	}
 }

@@ -8,5 +8,6 @@ public class SpringJpaProjectApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(SpringJpaProjectApplication.class, args);
+		System.out.println("hejhej");
 	}
 }

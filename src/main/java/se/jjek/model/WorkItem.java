@@ -1,12 +1,23 @@
 package se.jjek.model;
 
+import javax.persistence.Entity;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+
+@Entity
 public final class WorkItem extends AbstractEntity {
 
 	private final String itemName;
 	private final String description;
 	private final int workStatus;
+	
+	@OneToMany
+	private User user;
+	
+	@OneToOne
+	private Issue issue;
 
-	public WorkItem(String itemName, String description, int workStatus) {
+	public WorkItem(String itemName, String description, int workStatus, User user) {
 		this.itemName = itemName;
 		this.description = description;
 		this.workStatus = workStatus;
@@ -23,6 +34,11 @@ public final class WorkItem extends AbstractEntity {
 	public int getWorkStatus() {
 		return workStatus;
 	}
+	
+	public User getUser() {
+		return user;
+	}
+	
 	@Override
 	public String toString() {
 		return String.format("WorkItem: %s, Description: %s and Status: %s", itemName,description,workStatus);

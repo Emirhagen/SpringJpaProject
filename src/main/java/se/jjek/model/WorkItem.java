@@ -1,6 +1,6 @@
 package se.jjek.model;
 
-public final class WorkItem {
+public final class WorkItem extends AbstractEntity {
 
 	private final String itemName;
 	private final String description;

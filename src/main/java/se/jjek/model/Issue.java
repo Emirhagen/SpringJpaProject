@@ -1,7 +1,7 @@
 package se.jjek.model;
 
 
-public final class Issue {
+public final class Issue extends AbstractEntity {
 
 	private final String issue;
 	private final String specifiedIssue;

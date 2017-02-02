@@ -1,6 +1,6 @@
 package se.jjek.model;
 
-public final class User {
+public final class User extends AbstractEntity {
 
 	private final String userName;
 	private int userStatus;

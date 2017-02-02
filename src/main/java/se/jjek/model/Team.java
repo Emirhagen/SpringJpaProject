@@ -1,6 +1,6 @@
 package se.jjek.model;
 
-public final class Team {
+public final class Team extends AbstractEntity {
 
 	private final String teamName;
 

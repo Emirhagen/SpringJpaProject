@@ -1,7 +1,6 @@
 package se.jjek.service;
 
 import java.util.Collection;
-import java.util.HashSet;
 
 import javax.transaction.Transactional;
 
@@ -30,13 +29,17 @@ public class EntityService {
 		Team dbTeam = teamRepository.findOne(team.getId());
 		User dbUser = userRepository.findOne(user.getId());
 		try {
-
-			Collection<User> users = dbTeam.getUsers();
-			users.add(dbUser);
-			dbTeam.setUsers(users);
-			dbUser.setTeam(dbTeam);
-			addUser(dbUser);
-			addTeam(dbTeam);
+			if (dbTeam.getUsers().size() < 10) {
+				Collection<User> users = dbTeam.getUsers();
+				users.add(dbUser);
+				dbTeam.setUsers(users);
+				dbUser.setTeam(dbTeam);
+				addUser(dbUser);
+				addTeam(dbTeam);
+			} else {
+				throw new ServiceException(
+						user + " could not be added to team " + team + ", a team can only have 10 members");
+			}
 
 		} catch (Exception e) {
 			throw new ServiceException("User " + user + " could not be added to " + team, e);
@@ -65,7 +68,7 @@ public class EntityService {
 	}
 
 	public Collection<Team> getAllTeams() {
-		Collection<Team> teams = new HashSet<>();
+		Collection<Team> teams = (Collection<Team>) teamRepository.findAll();
 		return teams;
 	}
 }

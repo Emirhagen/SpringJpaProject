@@ -2,12 +2,13 @@ package se.jjek.model;
 
 import java.util.Collection;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 
 @Entity
-public final class Team extends AbstractEntity {
+public class Team extends AbstractEntity {
 
 	private String teamName;
 	private boolean active;

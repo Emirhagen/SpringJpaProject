@@ -1,21 +1,23 @@
 package se.jjek.model;
 
 import javax.persistence.Entity;
-import javax.persistence.OneToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 
 @Entity
-public final class WorkItem extends AbstractEntity {
+public class WorkItem extends AbstractEntity {
 
-	private final String itemName;
-	private final String description;
-	private final int workStatus;
+	private String itemName;
+	private String description;
+	private int workStatus;
 	
-	@OneToMany
+	@ManyToOne
 	private User user;
+//	
+//	@OneToOne
+//	private Issue issue;
 	
-	@OneToOne
-	private Issue issue;
+	protected WorkItem(){}
 
 	public WorkItem(String itemName, String description, int workStatus, User user) {
 		this.itemName = itemName;

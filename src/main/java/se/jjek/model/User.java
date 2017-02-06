@@ -2,6 +2,7 @@ package se.jjek.model;
 
 import java.util.Collection;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
@@ -18,7 +19,7 @@ public class User extends AbstractEntity {
 	private String lastName;
 	private boolean active;
 
-	@OneToMany(mappedBy = "user")
+	@OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST)
 	private Collection<WorkItem> workItems;
 	
 	@ManyToOne
@@ -61,7 +62,7 @@ public class User extends AbstractEntity {
 		return active;
 	}
 
-	public void setActiveUser(boolean activeUser) {
+	public void setActiveUser(boolean active) {
 		this.active = active;
 	}
 
@@ -71,6 +72,10 @@ public class User extends AbstractEntity {
 
 	public void setTeam(Team team) {
 		this.team = team;
+	}
+	
+	public Collection<WorkItem> getWorkItems() {
+		return workItems;
 	}
 
 	@Override

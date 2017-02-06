@@ -71,4 +71,41 @@ public class EntityService {
 		Collection<Team> teams = (Collection<Team>) teamRepository.findAll();
 		return teams;
 	}
+	
+	public User getUserByID(long id) {
+		return userRepository.findOne(id);
+	}
+
+	public Collection<User> getAllUsers() {
+		return (Collection<User>) userRepository.findAll();
+	}
+
+	public Collection<User> getUsersByNames(String firstName, String lastName, String userName) {
+		return (Collection<User>) userRepository.getUsersByNames(firstName, lastName, userName);
+	}
+
+	public User saveUser(User user) {
+		isValidUsername(user.getUserName());
+		if (user.isActiveUser() == false) {
+			changeWorkItemStatusToUnstarted(user);
+		}
+		return userRepository.save(user);
+	}
+	
+	private static final int USERNAME_MIN_LENGTH = 10;
+	private boolean isValidUsername(String username) {
+		if (username.length() >= USERNAME_MIN_LENGTH) {
+			return true;
+		}
+		throw new ServiceException("username too short");
+	}
+
+	private void changeWorkItemStatusToUnstarted(User user) {
+		user.getWorkItems().forEach(w -> {
+			if (w.getWorkStatus() == 2) { // Missing Setter.Enum IF == STARTED
+				w.setWorkStatus(1); // SET == UNSTARTED
+			}
+			System.out.println("TODO Adjust to the right values"); // TODO
+		});
+	}
 }

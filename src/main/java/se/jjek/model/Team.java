@@ -1,55 +1,48 @@
 package se.jjek.model;
 
-import java.util.Collection;
+import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.OneToMany;
 
 @Entity
 public class Team extends AbstractEntity {
 
-	private String teamName;
+	private String teamname;
 	private boolean active;
 
-	@OneToMany(mappedBy = "team", fetch = FetchType.EAGER)
-	private Collection<User> users;
-	
-	protected Team(){}
+	@OneToMany(mappedBy = "team")
+	private Set<User> users;
 
-	public Team(String teamName, boolean active) {
-		this.teamName = teamName;
+	protected Team() {
+	}
+
+	public Team(String teamname, boolean active) {
+		this.teamname = teamname;
 		this.active = active;
 	}
-	
+
 	@Override
 	public Long getId() {
 		return super.getId();
 	}
-	
-	public String getTeamName() {
-		return teamName;
-	}
-	
-	public void setTeamName(String teamName) {
-		this.teamName = teamName;
-	}
-	
-	public boolean isActive() {
-		return active;
-	}
-	
+
 	public void setActive(boolean active) {
 		this.active = active;
-	}	
-	
-	public Collection<User> getUsers() {
+	}
+
+	public String getTeamName() {
+		return teamname;
+	}
+
+	public Set<User> getUsers() {
 		return users;
 	}
 
-	public void setUsers(Collection<User> users) {
-		this.users = users;
+	public boolean isActive() {
+		return active;
 	}
 
 	@Override
@@ -60,7 +53,7 @@ public class Team extends AbstractEntity {
 
 		if (other instanceof Team) {
 			Team otherTeam = (Team) other;
-			return teamName.equals(otherTeam.teamName);
+			return teamname.equals(otherTeam.teamname);
 		}
 
 		return false;
@@ -70,14 +63,9 @@ public class Team extends AbstractEntity {
 	public int hashCode() {
 
 		int result = 1;
-		result += 37 * teamName.hashCode();
+		result += 37 * teamname.hashCode();
 
 		return result;
-	}
-	
-	@Override
-	public String toString() {
-		return getId() + ", " + teamName;
 	}
 
 }

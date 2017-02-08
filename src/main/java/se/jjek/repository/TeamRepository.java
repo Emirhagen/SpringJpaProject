@@ -1,20 +1,15 @@
 package se.jjek.repository;
 
-import org.springframework.data.repository.PagingAndSortingRepository;
+import java.util.Collection;
+
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
 
 import se.jjek.model.Team;
-import se.jjek.model.User;
 
-public interface TeamRepository extends PagingAndSortingRepository<Team, Long> {
+public interface TeamRepository extends CrudRepository<Team, Long> {
 
-	Team addUserToTeam(User user);
+	@Query("SELECT e FROM Team e")
+	Collection<Team> getAllTeams();
 	
-	
-	/*
-		* Skapa ett team
-		* Uppdatera ett team
-		* Inaktivera ett team
-		* Hämta alla team
-		* Lägga till en User till ett Team
-	 */
 }

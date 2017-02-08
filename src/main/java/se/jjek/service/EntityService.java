@@ -1,111 +1,212 @@
 package se.jjek.service;
 
 import java.util.Collection;
-
 import javax.transaction.Transactional;
 
+import org.hibernate.service.spi.ServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
+import antlr.collections.List;
+import javassist.bytecode.stackmap.BasicBlock.Catch;
+import se.jjek.model.Issue;
 import se.jjek.model.Team;
 import se.jjek.model.User;
+import se.jjek.model.WorkItem;
+import se.jjek.repository.IssueRepository;
 import se.jjek.repository.TeamRepository;
 import se.jjek.repository.UserRepository;
+import se.jjek.repository.WorkItemRepository;
 
 @Component
-public class EntityService {
+public final class EntityService {
 
-	private TeamRepository teamRepository;
-	private UserRepository userRepository;
+	private final UserRepository userRepository;
+	private final TeamRepository teamRepository;
+	private final WorkItemRepository workItemRepository;
+	private final IssueRepository issueRepository;
+	private final ServiceTransaction executor;
 
 	@Autowired
-	public EntityService(TeamRepository teamRepository, UserRepository userRepository) {
-		this.teamRepository = teamRepository;
+	public EntityService(UserRepository userRepository, TeamRepository teamRepository,
+			WorkItemRepository workItemRepository, IssueRepository issueRepository, ServiceTransaction executor) {
 		this.userRepository = userRepository;
+		this.teamRepository = teamRepository;
+		this.workItemRepository = workItemRepository;
+		this.issueRepository = issueRepository;
+		this.executor = executor;
 	}
 
-	@Transactional
-	public void addUserToTeam(User user, Team team) throws ServiceException {
-		Team dbTeam = teamRepository.findOne(team.getId());
-		User dbUser = userRepository.findOne(user.getId());
-		try {
-			if (dbTeam.getUsers().size() < 10) {
-				Collection<User> users = dbTeam.getUsers();
-				users.add(dbUser);
-				dbTeam.setUsers(users);
-				dbUser.setTeam(dbTeam);
-				addUser(dbUser);
-				addTeam(dbTeam);
-			} else {
-				throw new ServiceException(
-						user + " could not be added to team " + team + ", a team can only have 10 members");
-			}
-
-		} catch (Exception e) {
-			throw new ServiceException("User " + user + " could not be added to " + team, e);
+	public User saveOrUpdateUser(User user) {
+		if (user.getUsername().length() < 5) {
+			throw new ServiceException("Username too short.");
 		}
-	}
-
-	public Team findTeamById(Long teamId) {
-		return teamRepository.findOne(teamId);
-	}
-
-	public User findUserById(Long userId) {
-		return userRepository.findOne(userId);
-	}
-
-	public Team addTeam(Team team) {
-		return teamRepository.save(team);
-	}
-
-	public User addUser(User user) {
 		return userRepository.save(user);
 	}
 
-	public Team deactivateTeam(Team team) {
+	public User inactivateUser(Long userId) {
+		try {
+			return executor.execute(() -> {
+				User user = userRepository.findOne(userId);
+				user.setActive(false);
+				setItemStatus(user);
+				return userRepository.save(user);
+			});
+		} catch (DataAccessException e) {
+			throw new ServiceException("Could not inactivate user " + e);
+		}
+	}
+
+	public User addUserToTeam(Long teamId, Long userId) {
+		try {
+			if (!isValidNumbersOfUsers(teamId)) {
+				throw new ServiceException("Max 10 users in team.");
+			}
+
+			return executor.execute(() -> {
+				User user = userRepository.findOne(userId);
+				Team team = teamRepository.findOne(teamId);
+				user.setTeam(team);
+				return userRepository.save(user);
+			});
+		} catch (DataAccessException e) {
+			throw new ServiceException("Could not add user to team. " + e);
+		}
+	}
+
+	public User findUserByUsername(String username) {
+		return userRepository.findUserByUsername(username);
+	}
+
+	public User findUserByNumber(String number) {
+		return userRepository.findUserByNumber(number);
+	}
+
+	public Collection<User> getAllUsersInATeam(Long id) {
+		return userRepository.getAllUsersInATeam(id);
+	}
+	
+
+	public Team saveOrUpdateTeam(Team team) {
+		return teamRepository.save(team);
+	}
+
+	public Team inactivateTeam(Long teamId) {
+		Team team = teamRepository.findOne(teamId);
 		team.setActive(false);
 		return teamRepository.save(team);
 	}
 
 	public Collection<Team> getAllTeams() {
-		Collection<Team> teams = (Collection<Team>) teamRepository.findAll();
-		return teams;
-	}
-	
-	public User getUserByID(long id) {
-		return userRepository.findOne(id);
+		return teamRepository.getAllTeams();
 	}
 
-	public Collection<User> getAllUsers() {
-		return (Collection<User>) userRepository.findAll();
+	public WorkItem saveOrUpdateWorkItem(WorkItem workItem) {
+		return workItemRepository.save(workItem);
 	}
 
-	public Collection<User> getUsersByNames(String firstName, String lastName, String userName) {
-		return (Collection<User>) userRepository.getUsersByNames(firstName, lastName, userName);
-	}
-
-	public User saveUser(User user) {
-		isValidUsername(user.getUserName());
-		if (user.isActiveUser() == false) {
-			changeWorkItemStatusToUnstarted(user);
+	public WorkItem changeWorkStatus(Long itemId, int workStatus) {
+		try {
+			return executor.execute(() -> {
+				WorkItem workItem = workItemRepository.findOne(itemId);
+				workItem.setWorkStatus(workStatus);
+				return workItemRepository.save(workItem);
+			});
+		} catch (DataAccessException e) {
+			throw new ServiceException("Could not change status" + e);
 		}
-		return userRepository.save(user);
-	}
-	
-	private static final int USERNAME_MIN_LENGTH = 10;
-	private boolean isValidUsername(String username) {
-		if (username.length() >= USERNAME_MIN_LENGTH) {
-			return true;
-		}
-		throw new ServiceException("username too short");
 	}
 
-	private void changeWorkItemStatusToUnstarted(User user) {
-		user.getWorkItems().forEach(w -> {
-			if (w.getWorkStatus() == 2) { // Missing Setter.Enum IF == STARTED
-				w.setWorkStatus(1); // SET == UNSTARTED
+	public void deleteWorkItem(Long itemId) {
+		workItemRepository.delete(itemId);
+	}
+
+	public WorkItem assignWorkItem(Long itemId, Long userId) {
+		try {
+			if (!isActiveUser(userId)) {
+				throw new ServiceException("User is not active.");
 			}
-			System.out.println("TODO Adjust to the right values"); // TODO
-		});
+			if (!isValidNumbersOfItems(userId)) {
+				throw new ServiceException("Maximum amount of Workitems.");
+			}
+			return executor.execute(() -> {
+				WorkItem item = workItemRepository.findOne(itemId);
+				User user = userRepository.findOne(userId);
+				item.setUser(user);
+				userRepository.save(user);
+				return workItemRepository.save(item);
+			});
+		} catch (DataAccessException e) {
+			throw new ServiceException("Could not assign item. " + e);
+		}
 	}
+
+	public Collection<WorkItem> getWorkItemsByStatus(int workStatus) {
+		return workItemRepository.findWorkItemsByWorkStatus(workStatus);
+	}
+
+	public Collection<WorkItem> getWorkItemsFromTeam(Long teamId) {
+		Team team = teamRepository.findOne(teamId);
+		return workItemRepository.findWorkItemByUserTeam(team);
+	}
+
+	public Collection<WorkItem> getWorkItemsByUser(Long userId) {
+		User user = userRepository.findOne(userId);
+		return workItemRepository.findWorkItemByUser(user);
+	}
+
+	public Collection<WorkItem> getWorkItemByDescription(String description) {
+		return workItemRepository.findByDescriptionLike(description);
+	}
+
+	public Issue saveOrUpdateIssue(Issue issue, Long itemId) {
+		try {
+			if (!workItemIsDone(itemId)) {
+				throw new ServiceException("Workitem is not done.");
+			}
+
+			return executor.execute(() -> {
+				WorkItem item = workItemRepository.findOne(itemId);
+				item.setWorkStatus(0);
+				issueRepository.save(issue);
+				item.setIssue(issue);
+				saveOrUpdateWorkItem(item);
+				return issue;
+			});
+		} catch (DataAccessException e) {
+			throw new ServiceException("Could not save or update issue. " + e);
+		}
+	}
+
+	public Collection<WorkItem> getIssuedWorkItems() {
+		return issueRepository.getIssuedWorkItems();
+	}
+
+	private void setItemStatus(User user) {
+		Collection<WorkItem> items = getWorkItemsByUser(user.getId());
+		for (WorkItem currentItem : items) {
+			currentItem.setWorkStatus(0);
+			workItemRepository.save(currentItem);
+		}
+
+	}
+
+	private boolean isValidNumbersOfUsers(Long teamId) {
+		return getAllUsersInATeam(teamId).size() < 10;
+	}
+
+	private boolean isActiveUser(Long userId) {
+		return userRepository.findOne(userId).isActive();
+	}
+
+	private boolean isValidNumbersOfItems(Long userId) {
+		return getWorkItemsByUser(userId).size() < 5;
+	}
+
+	private boolean workItemIsDone(Long itemId) {
+		return workItemRepository.findOne(itemId).getWorkStatus() == 3;
+	}
+
 }

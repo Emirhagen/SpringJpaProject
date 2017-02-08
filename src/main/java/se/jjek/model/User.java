@@ -1,81 +1,71 @@
 package se.jjek.model;
 
 import java.util.Collection;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
+import java.util.Set;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
 @Entity
 public class User extends AbstractEntity {
 
-	@Column(nullable = false)
-	private String userName;
-	@Column(nullable = false)
-	private String firstName;
-	@Column(nullable = false)
-	private String lastName;
+	private String username;
 	private boolean active;
+	private String number;
 
-	@OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST)
+	@OneToMany(mappedBy = "user")
 	private Collection<WorkItem> workItems;
-	
+
 	@ManyToOne
 	private Team team;
-	
-	protected User(){}
 
-	public User(String userName, String firstName, String lastName, boolean active) {
-		this.userName = userName;
-		this.firstName = firstName;
-		this.lastName = lastName;
+	protected User() {
+	}
+
+	public User(String username, boolean active, String number) {
+		this.username = username;
+		this.active = active;
+		this.number = number;
+
+	}
+
+	@Override
+	public Long getId() {
+		return super.getId();
+	}
+
+	public String getNumber() {
+		return number;
+	}
+
+	public void setActive(boolean active) {
 		this.active = active;
 	}
 
-	public String getUserName() {
-		return userName;
-	}
-
-	public void setUserName(String userName) {
-		this.userName = userName;
-	}
-
-	public String getFirstName() {
-		return firstName;
-	}
-
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
-
-	public String getLastName() {
-		return lastName;
-	}
-
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
-	}
-
-	public boolean isActiveUser() {
-		return active;
-	}
-
-	public void setActiveUser(boolean active) {
-		this.active = active;
+	public void setTeam(Team team) {
+		this.team = team;
 	}
 
 	public Team getTeam() {
 		return team;
 	}
 
-	public void setTeam(Team team) {
-		this.team = team;
+	public String getUsername() {
+		return username;
 	}
-	
+
+	public boolean isActive() {
+		return active;
+	}
+
 	public Collection<WorkItem> getWorkItems() {
 		return workItems;
+	}
+
+	@Override
+	public String toString() {
+		return String.format("User: %s", username);
 	}
 
 	@Override
@@ -86,7 +76,7 @@ public class User extends AbstractEntity {
 
 		if (other instanceof User) {
 			User otherUser = (User) other;
-			return userName.equals(otherUser.userName);
+			return username.equals(otherUser.username);
 		}
 		return false;
 	}
@@ -95,14 +85,8 @@ public class User extends AbstractEntity {
 	public int hashCode() {
 
 		int result = 1;
-		result += 37 * userName.hashCode();
+		result += 37 * username.hashCode();
 
 		return result;
-	}
-
-	@Override
-	public String toString() {
-		return "User [id=" + super.getId() + ", userName=" + userName + ", firstName=" + firstName + ", lastName="
-				+ lastName + ", activeUser=" + active + ", teamId=" + team.getId() + "]\n";
 	}
 }

@@ -1,19 +1,16 @@
 package se.jjek.repository;
 
 import java.util.Collection;
-
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.PagingAndSortingRepository;
-import org.springframework.data.repository.query.Param;
-
+import org.springframework.data.repository.CrudRepository;
 import se.jjek.model.User;
 
-public interface UserRepository extends PagingAndSortingRepository<User, Long> {
+public interface UserRepository extends CrudRepository<User, Long> {
 
-	Collection<User> findUserByTeamId(long id);
-
-	@Query("SELECT u FROM #{#entityName} u WHERE u.userName LIKE CONCAT(Rtrim(:uName),'%') AND u.firstName LIKE CONCAT(Rtrim(:fName),'%') AND u.lastName LIKE CONCAT(Rtrim(:lName),'%')")
-	Collection<User> getUsersByNames(@Param("uName") String userName, @Param("fName") String firstName,
-			@Param("lName") String lastName);
-
+	User findUserByNumber(String number);
+	User findUserByUsername(String username);
+	
+	@Query("SELECT e from User e join fetch e.team ed WHERE ed.id = ?1")
+	Collection<User> getAllUsersInATeam(Long team_id);
+		
 }

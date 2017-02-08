@@ -1,6 +1,10 @@
 package se.jjek.model;
 
+import java.util.Set;
+
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 
@@ -12,21 +16,38 @@ public class WorkItem extends AbstractEntity {
 	private int workStatus;
 	
 	@ManyToOne
+	@JoinColumn(name = "user_id")
 	private User user;
-//	
-//	@OneToOne
-//	private Issue issue;
+	
+	@OneToOne
+	@JoinColumn(unique = true)
+	private Issue issue;
+	
 	
 	protected WorkItem(){}
 
-	public WorkItem(String itemName, String description, int workStatus, User user) {
+	public WorkItem(String itemName, String description, int workStatus) {
 		this.itemName = itemName;
 		this.description = description;
 		this.workStatus = workStatus;
+		
+	}
+	
+	@Override
+	public Long getId() {
+		return super.getId();
 	}
 
 	public String getItemName() {
 		return itemName;
+	}
+	
+	public void setIssue(Issue issue) {
+		this.issue = issue;
+	}
+	
+	public void setUser(User user) {
+		this.user = user;
 	}
 
 	public String getDescription() {
@@ -37,8 +58,8 @@ public class WorkItem extends AbstractEntity {
 		return workStatus;
 	}
 	
-	public User getUser() {
-		return user;
+	public void setWorkStatus(int workStatus) {
+		this.workStatus = workStatus;
 	}
 	
 	@Override

@@ -1,36 +1,45 @@
 package se.jjek.model;
 
-import java.util.Set;
-
-import javax.persistence.Column;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
+
+import org.hibernate.annotations.Cascade;
 
 @Entity
 public class WorkItem extends AbstractEntity {
 
 	private String itemName;
 	private String description;
-	private int workStatus;
+	@Enumerated(EnumType.STRING)
+	private Status workStatus;
+	private boolean active;
 	
 	@ManyToOne
 	@JoinColumn(name = "user_id")
 	private User user;
 	
-	@OneToOne
+	@OneToOne (cascade = CascadeType.REMOVE)
 	@JoinColumn(unique = true)
 	private Issue issue;
 	
 	
 	protected WorkItem(){}
 
-	public WorkItem(String itemName, String description, int workStatus) {
+	public WorkItem(String itemName, String description, Status workStatus) {
 		this.itemName = itemName;
 		this.description = description;
 		this.workStatus = workStatus;
+		this.active = true;
 		
+	}
+	
+	public static enum Status {
+		UNSTARTED, STARTED, DONE;
 	}
 	
 	@Override
@@ -46,6 +55,14 @@ public class WorkItem extends AbstractEntity {
 		this.issue = issue;
 	}
 	
+	public boolean isActive() {
+		return active;
+	}
+	
+	public void setActive(boolean active) {
+		this.active = active;
+	}
+	
 	public void setUser(User user) {
 		this.user = user;
 	}
@@ -54,11 +71,11 @@ public class WorkItem extends AbstractEntity {
 		return description;
 	}
 
-	public int getWorkStatus() {
+	public Status getWorkStatus() {
 		return workStatus;
 	}
 	
-	public void setWorkStatus(int workStatus) {
+	public void setWorkStatus(Status workStatus) {
 		this.workStatus = workStatus;
 	}
 	

@@ -11,6 +11,7 @@ import se.jjek.model.Issue;
 import se.jjek.model.Team;
 import se.jjek.model.User;
 import se.jjek.model.WorkItem;
+import se.jjek.model.WorkItem.Status;
 import se.jjek.repository.IssueRepository;
 import se.jjek.repository.TeamRepository;
 import se.jjek.repository.UserRepository;
@@ -82,7 +83,7 @@ public final class EntityService {
 	}
 	
 	public Collection<User> findByNameDescriptions(String firstName, String lastName, String username){
-		return userRepository.searchUserByNames(username, firstName, lastName);
+		return userRepository.searchUserByNamesContaining(username, firstName, lastName);
 	}
 
 	public Collection<User> getAllUsersInATeam(Long id) {
@@ -107,7 +108,7 @@ public final class EntityService {
 		return workItemRepository.save(workItem);
 	}
 
-	public WorkItem changeWorkStatus(Long itemId, int workStatus) {
+	public WorkItem changeWorkStatus(Long itemId, Status workStatus) {
 		try {
 			return executor.execute(() -> {
 				WorkItem workItem = workItemRepository.findOne(itemId);
@@ -143,7 +144,7 @@ public final class EntityService {
 		}
 	}
 
-	public Collection<WorkItem> getWorkItemsByStatus(int workStatus) {
+	public Collection<WorkItem> getWorkItemsByStatus(Status workStatus) {
 		return workItemRepository.findWorkItemsByWorkStatus(workStatus);
 	}
 
@@ -158,7 +159,7 @@ public final class EntityService {
 	}
 
 	public Collection<WorkItem> getWorkItemByDescription(String description) {
-		return workItemRepository.findByDescriptionLike(description);
+		return workItemRepository.findByDescriptionContaining(description);
 	}
 
 	public Issue saveOrUpdateIssue(Issue issue, Long itemId) {
@@ -169,7 +170,7 @@ public final class EntityService {
 
 			return executor.execute(() -> {
 				WorkItem item = workItemRepository.findOne(itemId);
-				item.setWorkStatus(0);
+				item.setWorkStatus(Status.UNSTARTED);
 				issueRepository.save(issue);
 				item.setIssue(issue);
 				saveOrUpdateWorkItem(item);
@@ -187,7 +188,7 @@ public final class EntityService {
 	private void setItemStatus(User user) {
 		Collection<WorkItem> items = getWorkItemsByUser(user.getId());
 		for (WorkItem currentItem : items) {
-			currentItem.setWorkStatus(0);
+			currentItem.setWorkStatus(Status.UNSTARTED);
 			workItemRepository.save(currentItem);
 		}
 
@@ -206,7 +207,7 @@ public final class EntityService {
 	}
 
 	private boolean workItemIsDone(Long itemId) {
-		return workItemRepository.findOne(itemId).getWorkStatus() == 3;
+		return workItemRepository.findOne(itemId).getWorkStatus() == Status.DONE;
 	}
 
 }

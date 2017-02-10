@@ -17,6 +17,7 @@ public interface WorkItemRepository extends CrudRepository<WorkItem, Long> {
 	
 	Collection<WorkItem> findWorkItemByUser(User user);
 	
+	
 	Collection<WorkItem> findByDescriptionContaining(String description);
 	
 }

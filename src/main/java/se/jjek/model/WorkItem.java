@@ -34,7 +34,6 @@ public class WorkItem extends AbstractEntity {
 		this.description = description;
 		this.workStatus = workStatus;
 		this.active = true;
-		
 	}
 	
 	public static enum Status {

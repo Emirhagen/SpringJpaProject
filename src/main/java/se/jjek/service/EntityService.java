@@ -29,8 +29,7 @@ public final class EntityService {
 
 	@Autowired
 	public EntityService(UserRepository userRepository, TeamRepository teamRepository,
-			WorkItemRepository workItemRepository, IssueRepository issueRepository, 
-			ServiceTransaction executor) {
+			WorkItemRepository workItemRepository, IssueRepository issueRepository, ServiceTransaction executor) {
 		this.userRepository = userRepository;
 		this.teamRepository = teamRepository;
 		this.workItemRepository = workItemRepository;
@@ -82,8 +81,8 @@ public final class EntityService {
 	public User findUserByNumber(String number) {
 		return userRepository.findUserByNumber(number);
 	}
-	
-	public Collection<User> findByNameDescriptions(String firstName, String lastName, String username){
+
+	public Collection<User> findByNameDescriptions(String firstName, String lastName, String username) {
 		return userRepository.searchUserByNamesContaining(username, firstName, lastName);
 	}
 

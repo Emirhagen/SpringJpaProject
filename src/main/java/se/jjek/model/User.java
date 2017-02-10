@@ -1,15 +1,16 @@
 package se.jjek.model;
 
 import java.util.Collection;
-import java.util.Set;
+
 import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
 @Entity
 public class User extends AbstractEntity {
 
+	private String firstName;
+	private String lastName;
 	private String username;
 	private boolean active;
 	private String number;
@@ -23,7 +24,9 @@ public class User extends AbstractEntity {
 	protected User() {
 	}
 
-	public User(String username, boolean active, String number) {
+	public User(String firstName, String lastName, String username, boolean active, String number) {
+		this.firstName = firstName;
+		this.lastName = lastName;
 		this.username = username;
 		this.active = active;
 		this.number = number;
@@ -33,6 +36,22 @@ public class User extends AbstractEntity {
 	@Override
 	public Long getId() {
 		return super.getId();
+	}
+
+	public String getFirstName() {
+		return firstName;
+	}
+
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+	public String getLastName() {
+		return lastName;
+	}
+
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
 	}
 
 	public String getNumber() {

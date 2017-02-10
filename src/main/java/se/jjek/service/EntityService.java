@@ -1,16 +1,12 @@
 package se.jjek.service;
 
 import java.util.Collection;
-import javax.transaction.Transactional;
 
 import org.hibernate.service.spi.ServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
-import antlr.collections.List;
-import javassist.bytecode.stackmap.BasicBlock.Catch;
 import se.jjek.model.Issue;
 import se.jjek.model.Team;
 import se.jjek.model.User;
@@ -23,6 +19,7 @@ import se.jjek.repository.WorkItemRepository;
 @Component
 public final class EntityService {
 
+	private static final int MAX_LENGHT_USERNAME = 10;
 	private final UserRepository userRepository;
 	private final TeamRepository teamRepository;
 	private final WorkItemRepository workItemRepository;
@@ -40,7 +37,7 @@ public final class EntityService {
 	}
 
 	public User saveOrUpdateUser(User user) {
-		if (user.getUsername().length() < 5) {
+		if (user.getUsername().length() < MAX_LENGHT_USERNAME) {
 			throw new ServiceException("Username too short.");
 		}
 		return userRepository.save(user);
@@ -83,11 +80,14 @@ public final class EntityService {
 	public User findUserByNumber(String number) {
 		return userRepository.findUserByNumber(number);
 	}
+	
+	public Collection<User> findByNameDescriptions(String firstName, String lastName, String username){
+		return userRepository.searchUserByNames(username, firstName, lastName);
+	}
 
 	public Collection<User> getAllUsersInATeam(Long id) {
 		return userRepository.getAllUsersInATeam(id);
 	}
-	
 
 	public Team saveOrUpdateTeam(Team team) {
 		return teamRepository.save(team);

@@ -27,7 +27,6 @@ public class WorkItem extends AbstractEntity {
 	@JoinColumn(unique = true)
 	private Issue issue;
 	
-	
 	protected WorkItem(){}
 
 	public WorkItem(String itemName, String description, Status workStatus) {

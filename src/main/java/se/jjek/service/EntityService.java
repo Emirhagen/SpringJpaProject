@@ -29,7 +29,8 @@ public final class EntityService {
 
 	@Autowired
 	public EntityService(UserRepository userRepository, TeamRepository teamRepository,
-			WorkItemRepository workItemRepository, IssueRepository issueRepository, ServiceTransaction executor) {
+			WorkItemRepository workItemRepository, IssueRepository issueRepository, 
+			ServiceTransaction executor) {
 		this.userRepository = userRepository;
 		this.teamRepository = teamRepository;
 		this.workItemRepository = workItemRepository;
